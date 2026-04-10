@@ -7,6 +7,9 @@ for each and every line of code that I submit in my source files and I thoroughl
 produce the output.
 
 resources utilized:
+https://www.geeksforgeeks.org/compiler-design/first-set-in-syntax-analysis/
+https://www.geeksforgeeks.org/compiler-design/follow-set-in-syntax-analysis/
+https://www.geeksforgeeks.org/dsa/preorder-traversal-of-binary-tree/
 
 signature: Ethan Hillebrand
 

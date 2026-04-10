@@ -3,23 +3,24 @@
 #define PARSER_H
 
 #include "token.h"
+#include "node.h"
 #include <string>
 
-void parser();
+Node* parser();
 void advance();
 void parserError(std::string expected);
 
-void S();  
-void A();
-void B();
-void C();
-void D();
-void E();
-void F();
-void G();
-void H();
-void J();
-void K();
+Node* S();
+Node* A();
+Node* B();
+Node* C();
+Node* D();
+Node* E();
+Node* F();
+Node* G();
+Node* H();
+Node* J();
+Node* K();
 
 
 

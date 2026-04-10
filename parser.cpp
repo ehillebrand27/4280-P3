@@ -1,14 +1,16 @@
 
 
-
 #include <iostream>
 #include "token.h"
 #include "scanner.h"
 #include "parser.h"
+#include "node.h"
+
 using namespace std;
 
 token tk;
 
+//get next token
 void advance() {
     tk = scanner();
 }
@@ -20,213 +22,258 @@ void parserError(string expected) {
     exit(1);
 }
 
-
-void parser() {
-    advance();
-    S();
-
-    if (tk.id != EOFTk) {
-        parserError("EOF");
-    }
-}
-
-
-void match(tokenID expected) {
+//verifies token matches expected token type
+token match(tokenID expected) {
     if (tk.id == expected) {
+        token temp = tk;
         advance();
+        return temp;
     } else {
         parserError("different token");
     }
 }
 
+//starts parser
+Node* parser() {
+    advance();
+    Node* root = S();
 
+    if (tk.id != EOFTk) {
+        parserError("EOF");
+    }
 
-
-
-void S() {
-    cout << "Entering " << __func__ << " with token: " << tk.instance << endl;
-    A();
-    K();
-    match(APOSTROPHE); 
+    return root;
 }
 
 
 
+Node* S() {
+    
+
+    Node* node = new Node();
+    node->label = "S";
+
+    node->child1 = A();
+    node->child2 = K();
+    node->tk1 = match(APOSTROPHE);
+
+    return node;
+}
 
 
 
+Node* A() {
+    
 
-void A() {
-    cout << "Entering " << __func__ << " with token: " << tk.instance << endl;
+    Node* node = new Node();
+    node->label = "A";
+
     if (tk.id == DOLLAR || tk.id == STAR) {
-        B();
+        node->child1 = B();
     }
     else if (tk.id == MINUS) {
-        C();
+        node->child1 = C();
     }
     else if (tk.id == PERCENT || tk.id == AMPERSAND) {
-        G();
-        H();
-        F();
-        J();
-        //match(APOSTROPHE);
-        //S();
+        node->child1 = G();
+        node->child2 = H();
+        node->child3 = F();
+        node->child4 = J();
     }
     else {
         parserError("A");
     }
+
+    return node;
 }
 
-void B()
-{
-    cout << "Entering " << __func__ << " with token: " << tk.instance << endl;
-    if(tk.id == DOLLAR)
-    {
-        match(DOLLAR);
-        match(T1);
-    }
 
-    else if(tk.id == STAR)
-    {
-        match(STAR);
-        match(T1);
-    }
 
-    else
-    {
+Node* B() {
+    
+    Node* node = new Node();
+    node->label = "B";
+
+    if(tk.id == DOLLAR) {
+        node->tk1 = match(DOLLAR);
+        node->tk2 = match(T1);
+    }
+    else if(tk.id == STAR) {
+        node->tk1 = match(STAR);
+        node->tk2 = match(T1);
+    }
+    else {
         parserError("B");
     }
 
+    return node;
 }
 
 
-void C()
-{
-    cout << "Entering " << __func__ << " with token: " << tk.instance << endl;
-    if(tk.id == MINUS)
-    {
-        match(MINUS);
-        match(T1);
-        J();
+
+Node* C() {
+    
+
+    Node* node = new Node();
+    node->label = "C";
+
+    if(tk.id == MINUS) {
+        node->tk1 = match(MINUS);
+        node->tk2 = match(T1);
+        node->child1 = J();
     }
-    else
-    {
+    else {
         parserError("C");
     }
+
+    return node;
 }
 
 
 
-void D()
-{
-    cout << "Entering " << __func__ << " with token: " << tk.instance << endl;
-    if(tk.id == LPAREN || tk.id == RPAREN)
-    {
-        E();
-        if(tk.id == T1 || tk.id == T2)
-            H();
-        D();
+Node* D() {
+    
+
+    if(tk.id == LPAREN || tk.id == RPAREN) {
+        Node* node = new Node();
+        node->label = "D";
+
+        node->child1 = E();
+        node->child2 = H();
+        node->child3 = D();
+
+        return node;
     }
+
+    return nullptr; 
 }
 
-void E()
-{
-    cout << "Entering " << __func__ << " with token: " << tk.instance << endl;
-    if(tk.id == LPAREN)
-    {
-        match(LPAREN);
-    }
 
-    else if(tk.id == RPAREN)
-    {
-        match(RPAREN);
+
+
+Node* E() {
+    
+
+    Node* node = new Node();
+    node->label = "E";
+
+    if(tk.id == LPAREN) {
+        node->tk1 = match(LPAREN);
     }
-    else 
-    {
+    else if(tk.id == RPAREN) {
+        node->tk1 = match(RPAREN);
+    }
+    else {
         parserError("E");
     }
+
+    return node;
 }
 
-void F()
-{
-    cout << "Entering " << __func__ << " with token: " << tk.instance << endl;
-    if(tk.id == COMMA)
-    {
-        match(COMMA);
-    }
 
-    else if(tk.id == PERIOD)
-    {
-        match(PERIOD);
-    }
 
-    else if(tk.id == PLUS)
-    {
-        match(PLUS);
+
+Node* F() {
+    
+
+    Node* node = new Node();
+    node->label = "F";
+
+    if(tk.id == COMMA) {
+        node->tk1 = match(COMMA);
     }
-    else 
-    {
+    else if(tk.id == PERIOD) {
+        node->tk1 = match(PERIOD);
+    }
+    else if(tk.id == PLUS) {
+        node->tk1 = match(PLUS);
+    }
+    else {
         parserError("F");
     }
+
+    return node;
 }
 
-void G()
-{
-    cout << "Entering " << __func__ << " with token: " << tk.instance << endl;
-    if(tk.id == PERCENT)
-    {
-        match(PERCENT);
-    }
 
-    else if(tk.id == AMPERSAND)
-    {
-        match(AMPERSAND);
+
+
+Node* G() {
+    
+
+    Node* node = new Node();
+    node->label = "G";
+
+    if(tk.id == PERCENT) {
+        node->tk1 = match(PERCENT);
     }
-    else 
-    {
+    else if(tk.id == AMPERSAND) {
+        node->tk1 = match(AMPERSAND);
+    }
+    else {
         parserError("G");
     }
+
+    return node;
 }
 
-void H()
-{
-    cout << "Entering " << __func__ << " with token: " << tk.instance << endl;
-    if(tk.id == T1)
-    {
-        match(T1);
-    }
+
+
+
+Node* H() {
     
-    else if(tk.id == T2)
-    {
-        match(T2);
+
+    Node* node = new Node();
+    node->label = "H";
+
+    if(tk.id == T1) {
+        node->tk1 = match(T1);
     }
-    else 
-    {
+    else if(tk.id == T2) {
+        node->tk1 = match(T2);
+    }
+    else {
         parserError("H");
     }
+
+    return node;
 }
 
 
 
 
-void J() {
-    cout << "Entering " << __func__ << " with token: " << tk.instance << endl;
-    match(APOSTROPHE); // consume '
-    if (tk.id == T1 || tk.id == T2) H();
-    D(); 
+Node* J() {
+    
+
+    Node* node = new Node();
+    node->label = "J";
+
+    node->tk1 = match(APOSTROPHE);
+
+    if (tk.id == T1 || tk.id == T2)
+        node->child1 = H();
+
+    node->child2 = D();
+
+    return node;
 }
 
 
 
-void K() {
-    cout << "Entering " << __func__ << " with token: " << tk.instance << endl;
 
-    // Only parse next S if next token can start an A
+
+Node* K() {
+    
+
     if (tk.id == DOLLAR || tk.id == STAR || tk.id == MINUS || tk.id == PERCENT || tk.id == AMPERSAND) {
-        S();
-        K();
-    } else {
-        // epsilon: sequence ends
-        return;
+        Node* node = new Node();
+        node->label = "K";
+
+        node->child1 = S();
+        node->child2 = K();
+
+        return node;
     }
+
+    return nullptr;
 }
